@@ -90,8 +90,26 @@ App `http://localhost:5173` pe chalegi.
 | DELETE | `/api/tasks/:id` | Task delete karo |
 
 ## 📸 Screenshots
+### Login Page
+![Login](./screenshot/login.png)
 
+### Register Page
+![Register](./screenshot/register.png)
 
+### Dashboard
+![Dashboard](./screenshot/Dashboard.png)
+
+### Add Task
+![Add Task](./screenshot/add_task.png)
+
+### Search Tasks
+![Search](./screenshot/Search.png)
+
+### Pending Filter
+![Pending Filter](./screenshot/Pending_Filter.png)
+
+### Completed Filter
+![Completed Filter](./screenshot/Completed_filter.png)
 
 ## 👨‍💻 Author
 
