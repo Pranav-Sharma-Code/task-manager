@@ -3,7 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
+
+
 const Register = () => {
+    const API_URL = import.meta.env.VITE_API_URL;
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -22,7 +25,7 @@ const Register = () => {
             return setError('Password must be at least 6 characters long');
         try {
             setLoading(true);
-            const res = await axios.post('http://localhost:5000/api/auth/register', formData);
+            const res = await axios.post(`${API_URL}/api/auth/register`, formData);
             login(res.data.token, res.data.user);
             navigate('/dashboard');
         } catch (err) {

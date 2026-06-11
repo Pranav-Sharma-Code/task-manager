@@ -4,7 +4,10 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
+
+
 const Dashboard = () => {
+    const API_URL = import.meta.env.VITE_API_URL;
     const { token, user, logout } = useAuth();
     const navigate = useNavigate();
 
@@ -24,7 +27,7 @@ const Dashboard = () => {
     const fetchTasks = async () => {
         try {
             setLoading(true);
-            const res = await axios.get('http://localhost:5000/api/tasks', config);
+            const res = await axios.get(`${API_URL}/api/tasks`, config);
             setTasks(res.data.tasks);
         } catch {
             console.log('Failed to load tasks');
@@ -49,7 +52,7 @@ const Dashboard = () => {
         if (!formData.title) return setFormError('Title is required');
         try {
             setFormLoading(true);
-            await axios.post('http://localhost:5000/api/tasks', formData, config);
+            await axios.post(`${API_URL}/api/tasks`, formData, config);
             setFormData({ title: '', description: '' });
             setShowForm(false);
             setFormError('');
@@ -68,7 +71,7 @@ const Dashboard = () => {
         try {
             setFormLoading(true);
             await axios.put(
-                `http://localhost:5000/api/tasks/${editTask._id}`,
+                `${API_URL}/api/tasks/${editTask._id}`,
                 { title: editTask.title, description: editTask.description },
                 config
             );
@@ -84,7 +87,7 @@ const Dashboard = () => {
 
     const handleToggle = async (id) => {
         try {
-            await axios.patch(`http://localhost:5000/api/tasks/${id}/toggle`, {}, config);
+            await axios.patch(`${API_URL}/api/tasks/${id}/toggle`, {}, config);
             setTasks(tasks =>
                 tasks.map(task =>
                     task._id === id
@@ -100,7 +103,7 @@ const Dashboard = () => {
 
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`http://localhost:5000/api/tasks/${id}`, config);
+            await axios.delete(`${API_URL}/api/tasks/${id}`, config);
             setTasks(tasks => tasks.filter(task => task._id !== id));
             toast.success('Task deleted');
         } catch {
@@ -120,7 +123,7 @@ const Dashboard = () => {
 
             <div className="bg-white/40 shadow-2xl backdrop-blur-lg border border-white/20 max-w-6xl mx-auto px-6 pt-6 rounded-2xl">
 
-                
+
                 <nav className="bg-gray-800 text-white px-4 sm:px-6 py-5 rounded-2xl shadow-lg">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 

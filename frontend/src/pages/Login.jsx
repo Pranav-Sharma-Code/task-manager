@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
+    const API_URL = import.meta.env.VITE_API_URL;
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -20,7 +21,7 @@ const Login = () => {
             return setError('Please fill in all fields');
         try {
             setLoading(true);
-            const res = await axios.post('http://localhost:5000/api/auth/login', formData);
+            const res = await axios.post(`${API_URL}/api/auth/login`, formData);
             login(res.data.token, res.data.user);
             navigate('/dashboard');
         } catch (err) {
