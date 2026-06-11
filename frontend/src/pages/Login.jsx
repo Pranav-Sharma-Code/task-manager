@@ -85,7 +85,7 @@ const Login = () => {
                         style={{
                             cursor: loading ? 'not-allowed' : 'pointer'
                         }}
-                        className=" w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-medium py-2.5 rounded-lg transition-a hover:scale-95 active:animate-ping active:scale-60 duration-100  text-sm "
+                        className=" w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-medium py-2.5 rounded-lg transition-all hover:scale-95 active:scale-90 duration-100  text-sm "
                     >
                         {loading ? '⏳ Login ho raha hai...' : 'Login →'}
                     </button>

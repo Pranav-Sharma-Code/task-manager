@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast'
-
-
+import toast from 'react-hot-toast';
 
 const Dashboard = () => {
     const { token, user, logout } = useAuth();
@@ -18,6 +16,8 @@ const Dashboard = () => {
     const [formLoading, setFormLoading] = useState(false);
     const [editTask, setEditTask] = useState(null);
     const [expanded, setExpanded] = useState(null);
+    const [search, setSearch] = useState('');
+    const [filter, setFilter] = useState('all');
 
     const config = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -33,9 +33,16 @@ const Dashboard = () => {
         }
     };
 
-    useEffect(() => {
-        fetchTasks();
-    }, []);
+    useEffect(() => { fetchTasks(); }, []);
+
+    // ✅ Bug 2 Fixed — filteredTasks properly defined
+    const filteredTasks = tasks.filter((task) => {
+        const matchesSearch =
+            task.title.toLowerCase().includes(search.toLowerCase()) ||
+            task.description.toLowerCase().includes(search.toLowerCase());
+        const matchesFilter = filter === 'all' || task.status === filter;
+        return matchesSearch && matchesFilter;
+    });
 
     const handleAddTask = async (e) => {
         e.preventDefault();
@@ -47,7 +54,7 @@ const Dashboard = () => {
             setShowForm(false);
             setFormError('');
             fetchTasks();
-            toast.success("Task added successfully");
+            toast.success('Task added successfully');
         } catch (err) {
             setFormError(err.response?.data?.message || 'Something went wrong');
         } finally {
@@ -67,7 +74,7 @@ const Dashboard = () => {
             );
             setEditTask(null);
             fetchTasks();
-            toast.success("Task updated successfully");
+            toast.success('Task updated successfully');
         } catch (err) {
             setFormError(err.response?.data?.message || 'Something went wrong');
         } finally {
@@ -77,36 +84,27 @@ const Dashboard = () => {
 
     const handleToggle = async (id) => {
         try {
-            await axios.patch(
-                `http://localhost:5000/api/tasks/${id}/toggle`,
-                {}, config
-            );
-
+            await axios.patch(`http://localhost:5000/api/tasks/${id}/toggle`, {}, config);
             setTasks(tasks =>
                 tasks.map(task =>
                     task._id === id
-                        ? { ...task, status: task.status === "completed" ? "pending" : "completed", }
+                        ? { ...task, status: task.status === 'completed' ? 'pending' : 'completed' }
                         : task
                 )
             );
-            toast.success("Task status updated");
+            toast.success('Task status updated');
         } catch {
-            toast.error("Failed to update status");
+            toast.error('Failed to update status');
         }
     };
 
     const handleDelete = async (id) => {
         try {
             await axios.delete(`http://localhost:5000/api/tasks/${id}`, config);
-            setTasks(tasks =>
-                tasks.filter(task =>
-                    task._id !== id
-                )
-            );
-
-            toast.success("Task deleted");
+            setTasks(tasks => tasks.filter(task => task._id !== id));
+            toast.success('Task deleted');
         } catch {
-            toast.error("Failed to delete task");
+            toast.error('Failed to delete task');
         }
     };
 
@@ -114,27 +112,66 @@ const Dashboard = () => {
     const completedCount = tasks.filter((t) => t.status === 'completed').length;
 
     return (
-        <div className=" min-h-screen overflow-hidden bg-indigo-950 py-8 px-4">
+        <div className="min-h-screen overflow-hidden bg-indigo-950 py-8 px-4">
 
-            <div className="fixed top-0 -left-20 h-72 w-72 rounded-full bg-purple-500/40 blur-3xl animate-pulse  [animation-duration:3s]" style={{ animationDelay: "5s"}}></div>
+            {/* Background blobs */}
+            <div className="fixed top-0 -left-20 h-72 w-72 rounded-full bg-purple-500/40 blur-3xl animate-pulse [animation-duration:3s]" style={{ animationDelay: '5s' }}></div>
+            <div className="fixed bottom-0 -right-20 h-72 w-72 rounded-full bg-indigo-400/40 blur-3xl animate-pulse [animation-duration:3s]" style={{ animationDelay: '5s' }}></div>
 
-            <div className="fixed bottom-0 -right-20 h-72 w-72 rounded-full bg-indigo-400/40 blur-3xl animate-pulse [animation-duration:3s]" style={{ animationDelay: "5s"}}></div>
+            <div className="bg-white/40 shadow-2xl backdrop-blur-lg border border-white/20 max-w-6xl mx-auto px-6 pt-6 rounded-2xl">
 
-            <div className="bg-white/40 shadow-2xl backdrop-blur-lg border border-white/20  max-w-6xl mx-auto px-6 pt-6 rounded-2xl">
-                {/* Navbar — Dark */}
-                <nav className="bg-gray-800 text-white px-6 py-8 rounded-2xl flex items-center justify-between shadow-lg">
-                    <div className="flex items-center gap-2">
-                        <span className="text-xl">📋</span>
-                        <h1 className="text-lg font-bold tracking-wide">Task Manager</h1>
-                    </div>
-                    <div className="flex items-center gap-4">
-                        <span className="text-sm text-slate-300">👋 {user?.name}</span>
-                        <button
-                            onClick={() => { logout(); navigate('/login'); }}
-                            className="bg-red-500 hover:scale-95 active:scale-90 active:animate-pulse duration-100 text-white text-sm px-4 py-1.5 rounded-lg transition-colors"
-                        >
-                            Logout
-                        </button>
+                
+                <nav className="bg-gray-800 text-white px-4 sm:px-6 py-5 rounded-2xl shadow-lg">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+
+                        {/* Left */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-xl">📋</span>
+                            <h1 className="text-lg font-bold tracking-wide">
+                                Task Manager
+                            </h1>
+                        </div>
+
+                        {/* Search */}
+                        <div className="w-full lg:flex-1 lg:max-w-md">
+                            <input
+                                type="text"
+                                placeholder="🔍 Search your tasks..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="
+                    w-full
+                    px-4 py-2.5
+                    rounded-lg
+                    text-sm
+                    bg-white/20
+                    text-white
+                    placeholder:text-slate-300
+                    border border-white/20
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-indigo-400
+                "
+                            />
+                        </div>
+
+                        {/* Right */}
+                        <div className="flex items-center justify-between lg:justify-end gap-4">
+                            <span className="text-sm text-slate-300 truncate">
+                                👋 {user?.name}
+                            </span>
+
+                            <button
+                                onClick={() => {
+                                    logout();
+                                    navigate('/login');
+                                }}
+                                className="bg-red-500 hover:scale-95 active:scale-90 text-white text-sm px-4 py-1.5 rounded-lg"
+                            >
+                                Logout
+                            </button>
+                        </div>
+
                     </div>
                 </nav>
 
@@ -154,6 +191,25 @@ const Dashboard = () => {
                             <p className="text-3xl font-bold text-emerald-600">{completedCount}</p>
                             <p className="text-sm text-gray-500 mt-1">Completed</p>
                         </div>
+                    </div>
+
+
+
+
+                    {/* Filter Buttons */}
+                    <div className="flex gap-2 mb-4">
+                        {['all', 'pending', 'completed'].map((f) => (
+                            <button
+                                key={f}
+                                onClick={() => setFilter(f)}
+                                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors capitalize ${filter === f
+                                    ? 'bg-indigo-600 text-white'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                            >
+                                {f === 'all' ? '📋 All' : f === 'pending' ? '⏳ Pending' : '✅ Completed'}
+                            </button>
+                        ))}
                     </div>
 
                     {/* Top Row */}
@@ -236,7 +292,6 @@ const Dashboard = () => {
                         </div>
                     )}
 
-                    {/* Task List */}
                     {loading ? (
                         <div className="text-center py-16 text-gray-400">⏳ Loading tasks...</div>
                     ) : tasks.length === 0 ? (
@@ -244,9 +299,14 @@ const Dashboard = () => {
                             <p className="text-5xl mb-3">📝</p>
                             <p className="text-gray-500">No tasks found — create your first task!</p>
                         </div>
+                    ) : filteredTasks.length === 0 ? (
+                        <div className="text-center py-16 bg-white rounded-xl shadow-sm">
+                            <p className="text-5xl mb-3">🔍</p>
+                            <p className="text-gray-500">No tasks match your search or filter</p>
+                        </div>
                     ) : (
                         <div className="space-y-3">
-                            {tasks.map((task) => (
+                            {filteredTasks.map((task) => (
                                 <div
                                     key={task._id}
                                     className="bg-white rounded-xl shadow-sm px-5 py-4 flex items-center justify-between hover:shadow-md transition-shadow"
@@ -259,30 +319,32 @@ const Dashboard = () => {
                                             onChange={() => handleToggle(task._id)}
                                             className="mt-1 w-4 h-4 accent-indigo-600 cursor-pointer"
                                         />
-                                        <div className='flex-1 min-w-0'>
+                                        <div className="flex-1 min-w-0">
                                             <p
                                                 onClick={() => setExpanded(expanded === task._id ? null : task._id)}
                                                 className={`font-medium font-sans text-xl cursor-pointer
-                                                     ${expanded === task._id ? "break-all" : "truncate"}
-                                        ${task.status === 'completed' ? 'line-through text-gray-400'
-                                                        : 'text-gray-800'
-                                                    }`}>
+                                                    ${expanded === task._id ? 'break-all' : 'truncate'}
+                                                    ${task.status === 'completed' ? 'line-through text-gray-400' : 'text-gray-800'}`}
+                                            >
                                                 {task.title}
                                             </p>
                                             {task.description && (
-                                                <p className={`text-ms font-mono text-gray-400 mt-0.5
-                                               ${expanded === task._id ? "break-all" : "truncate"}`}
-                                                >{task.description}</p>
+                                                <p className={`text-sm font-mono text-gray-400 mt-0.5
+                                                    ${expanded === task._id ? 'break-all' : 'truncate'}`}
+                                                >
+                                                    {task.description}
+                                                </p>
                                             )}
                                         </div>
                                     </div>
 
                                     {/* Right */}
                                     <div className="flex items-center gap-2 ml-4">
-                                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium 
-                                    ${task.status === 'completed' ? 'bg-emerald-100 text-emerald-700'
-                                                : 'bg-amber-100 text-amber-700'
-                                            }`}>
+                                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium
+                                            ${task.status === 'completed'
+                                                ? 'bg-emerald-100 text-emerald-700'
+                                                : 'bg-amber-100 text-amber-700'}`}
+                                        >
                                             {task.status}
                                         </span>
                                         <button
@@ -304,7 +366,7 @@ const Dashboard = () => {
                     )}
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 
