@@ -91,7 +91,7 @@ App `http://localhost:5173` pe chalegi.
 
 ## 📸 Screenshots
 
-<!-- Apne screenshots yahan add karna -->
+
 
 ## 👨‍💻 Author
 
