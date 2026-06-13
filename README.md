@@ -21,7 +21,7 @@ A modern full-stack task management application built using the MERN stack that 
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React.js, Tailwind CSS, Axios |
+| Frontend | React.js, Tailwind CSS |
 | Backend | Node.js, Express.js |
 | Database | MongoDB Atlas, Mongoose |
 | Authentication | JWT, bcryptjs |
